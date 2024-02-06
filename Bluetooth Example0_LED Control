@@ -1,0 +1,52 @@
+#include <ArduinoBLE.h>
+
+const int ledPin = LED_BUILTIN;  // Pin connected to the onboard LED
+int inPin = 14;
+BLEService ledService("0xFDF7");
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+
+  while (!Serial);
+  pinMode(ledPin, OUTPUT);
+  pinMode(inPin, OUTPUT);
+
+  if (!BLE.begin()) {
+    Serial.println("starting BLE failed!");
+    while (1)
+      ;
+  }
+
+  BLE.setLocalName("Peripheral");
+  BLE.setAdvertisedService(ledService);
+  BLE.advertise();
+
+  Serial.println("BTH Dev Active, Waiting for connections...");
+
+  digitalWrite(ledPin, LOW);
+  digitalWrite(inPin, 0);
+  Serial.println((digitalRead(inPin)));
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  BLEDevice central = BLE.central();  //computer
+
+  while (central.connected()) {
+    int signal = digitalRead(inPin);
+    //Serial.println((digitalRead(inPin)));
+    digitalWrite(inPin, HIGH);
+
+    if (signal) {
+      digitalWrite(ledPin, HIGH);
+      Serial.println("LED on");
+      delay(1500);
+      digitalWrite(ledPin, LOW);
+      delay(500);
+    } else {
+      digitalWrite(ledPin, LOW);
+      Serial.println("Signal writing failed");
+    }
+  }
+}
