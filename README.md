@@ -3,4 +3,6 @@
 ### References:
 1.TinyCircuit_Bluetooth  
 https://github.com/TinyCircuits/TinyCircuits-TinyShield-BLE-ASD2116/tree/master/examples  
-https://learn.tinycircuits.com/Communication/Bluetooth-Low-Energy_TinyShield_Tutorial/
+https://learn.tinycircuits.com/Communication/Bluetooth-Low-Energy_TinyShield_Tutorial/  
+2. TinyZero  
+https://learn.tinycircuits.com/Processors/TinyZero_Setup_Tutorial/  
