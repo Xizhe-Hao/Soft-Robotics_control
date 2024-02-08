@@ -6,3 +6,5 @@ https://github.com/TinyCircuits/TinyCircuits-TinyShield-BLE-ASD2116/tree/master/
 https://learn.tinycircuits.com/Communication/Bluetooth-Low-Energy_TinyShield_Tutorial/  
 2. TinyZero(Processor Board)  
 https://learn.tinycircuits.com/Processors/TinyZero_Setup_Tutorial/  
+3. SERVO TINYSHIELD  
+https://learn.tinycircuits.com/Motors/Servo-Controller_TinyShield_Tutorial/  
