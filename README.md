@@ -9,4 +9,7 @@ https://learn.tinycircuits.com/Processors/TinyZero_Setup_Tutorial/
 3. SERVO TINYSHIELD  
 https://learn.tinycircuits.com/Motors/Servo-Controller_TinyShield_Tutorial/  
 4. SERVO Working theory    
-https://blog.csdn.net/weixin_38288325/article/details/132366604  
+https://blog.csdn.net/weixin_38288325/article/details/132366604   
+5. Relay  
+https://blog.csdn.net/weixin_46251230/article/details/125470826  
+
