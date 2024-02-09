@@ -1,0 +1,74 @@
+#include <ArduinoBLE.h>
+
+BLEService ledService("180A"); // BLE LED Service
+BLEByteCharacteristic switchCharacteristic("2A57", BLERead | BLEWrite); // BLE LED Switch Characteristic
+
+void setup() {
+  Serial.begin(9600);
+  // while (!Serial);
+
+  pinMode(LED_BUILTIN, OUTPUT); // Set the built-in LED pin to output mode
+  pinMode(2, OUTPUT); // Set the built-in LED pin to output mode 
+
+  if (!BLE.begin()) {
+    Serial.println("Starting Bluetooth® Low Energy failed!");
+    while (1);
+  }
+
+  BLE.setLocalName("Nano 33 IoT");
+  BLE.setAdvertisedService(ledService);
+  ledService.addCharacteristic(switchCharacteristic);
+  BLE.addService(ledService);
+  switchCharacteristic.writeValue(0);
+  BLE.advertise(); // Start advertising
+  Serial.println("BLE LED Peripheral mode");
+}
+
+void loop() {
+  BLEDevice central = BLE.central(); // Listen for BLE central devices to connect
+
+  if (central) {
+    Serial.print("Connected to central device: ");
+    Serial.println(central.address());
+
+    while (central.connected()) {
+      if (switchCharacteristic.written()) {
+        switch (switchCharacteristic.value()) {
+          case 0x01:
+            controlLED(HIGH, 0); // LED on
+            break;
+          default:
+            controlLED(LOW, 0); // LED off
+            break;
+        }
+      }
+    }
+
+    Serial.print("Disconnected from central device: ");
+    Serial.println(central.address());
+  }
+}
+
+void controlLED(int state, unsigned long blinkInterval) {
+  static unsigned long previousMillis = 0;
+  unsigned long currentMillis = millis();
+
+  if (state == LOW) {
+    digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(2, LOW);
+  } else if (blinkInterval > 0) {
+    if (currentMillis - previousMillis >= blinkInterval) {
+      previousMillis = currentMillis;
+      if (digitalRead(LED_BUILTIN) == LOW) {
+        digitalWrite(LED_BUILTIN, HIGH);
+        digitalWrite(2, HIGH);
+      } else {
+        digitalWrite(LED_BUILTIN, LOW);
+        digitalWrite(2, LOW);
+      }
+    }
+  } else {
+    digitalWrite(LED_BUILTIN, state);
+    digitalWrite(2, state);
+  }
+}
