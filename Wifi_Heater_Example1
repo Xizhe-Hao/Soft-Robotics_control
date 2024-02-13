@@ -9,7 +9,7 @@ WiFiServer server(80); // Create a server that listens on port 80
 
 void setup() {
   Serial.begin(9600); // Start serial communication
-  while (!Serial); // Wait for the serial port to connect. Necessary only for boards with a native serial port.
+  // while (!Serial); // Wait for the serial port to connect. Necessary only for boards with a native serial port.
 
   pinMode(LED_BUILTIN, OUTPUT); // Set the built-in LED to output mode
   pinMode(2, OUTPUT); // Set the built-in LED to output mode
