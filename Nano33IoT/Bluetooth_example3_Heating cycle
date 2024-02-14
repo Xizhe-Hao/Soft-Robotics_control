@@ -1,0 +1,69 @@
+#include <ArduinoBLE.h>
+
+BLEService ledService("180A");
+BLEByteCharacteristic switchCharacteristic("2A57", BLERead | BLEWrite);
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(2, OUTPUT);
+
+  if (!BLE.begin()) {
+    Serial.println("Starting BLE failed!");
+    while (1);
+  }
+
+  BLE.setLocalName("Nano 33 IoT");
+  BLE.setAdvertisedService(ledService);
+  ledService.addCharacteristic(switchCharacteristic);
+  BLE.addService(ledService);
+  switchCharacteristic.writeValue(0);
+  BLE.advertise();
+  Serial.println("BLE LED Peripheral mode");
+}
+
+unsigned long ledOnMillis = 0; // Tracks when the LED was turned on
+bool ledCycleActive = false; // Indicates if the 4s on, 30s off cycle is active
+
+void loop() {
+  BLEDevice central = BLE.central();
+
+  if (central) {
+    Serial.println("Connected to central device: " + central.address());
+    while (central.connected()) {
+      if (switchCharacteristic.written()) {
+        switch (switchCharacteristic.value()) {
+          case 0x01:
+            digitalWrite(LED_BUILTIN, HIGH);
+            digitalWrite(2, HIGH);
+            ledCycleActive = false; // Stop the cycle if it was active
+            break;
+          case 0x02:
+            ledCycleActive = true; // Start the cycle
+            ledOnMillis = millis();
+            break;
+          default:
+            digitalWrite(LED_BUILTIN, LOW);
+            digitalWrite(2, LOW);
+            ledCycleActive = false; // Stop the cycle if it was active
+            break;
+        }
+      }
+
+      if (ledCycleActive) {
+        unsigned long currentMillis = millis();
+        if (currentMillis - ledOnMillis <= 4000) {
+          digitalWrite(LED_BUILTIN, HIGH); // LED on for 4 seconds
+          digitalWrite(2, HIGH); // LED on for 4 seconds
+        } else if (currentMillis - ledOnMillis <= 34000) {
+          digitalWrite(LED_BUILTIN, LOW); // LED off for 30 seconds
+          digitalWrite(2, LOW); // LED on for 4 seconds
+        } else {
+          ledOnMillis = currentMillis; // Reset timer for next cycle
+        }
+      }
+    }
+    Serial.println("Disconnected from central device: " + central.address());
+    ledCycleActive = false; // Ensure cycle stops when disconnected
+  }
+}
