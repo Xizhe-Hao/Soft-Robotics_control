@@ -1,0 +1,123 @@
+#include <WiFiNINA.h>
+
+// Replace with network credentials
+char ssid[] = "Mate 40 Pro"; // Network SSID (name)
+char pass[] = "0e951e51d75d"; // Network Password
+
+int status = WL_IDLE_STATUS; // WiFi initial status
+WiFiServer server(80); // Server at port 80
+
+bool heatingCycleActive = false; // Heating cycle state
+unsigned long heatingCycleStartTime = 0; // Start time of heating cycle
+
+void setup() {
+  Serial.begin(9600); // Start serial communication
+  
+  pinMode(LED_BUILTIN, OUTPUT); // Set built-in LED as output
+  pinMode(2, OUTPUT); // Set built-in LED as output
+
+  // Attempt to connect to WiFi network
+  while (status != WL_CONNECTED) {
+    Serial.print("Attempting to connect to SSID: ");
+    Serial.println(ssid);
+    status = WiFi.begin(ssid, pass); // Connect to WPA/WPA2 network
+
+    // Wait 10 seconds before retrying
+    delay(10000);
+  }
+
+  Serial.print("Successfully connected to ");
+  Serial.println(ssid);
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
+
+  server.begin(); // Start server
+
+  // Print the received signal strength
+  long rssi = WiFi.RSSI();
+  Serial.print("Signal strength (RSSI):");
+  Serial.print(rssi);
+  Serial.println(" dBm");
+}
+
+void loop() {
+  WiFiClient client = server.available(); // Listen for incoming clients
+
+  if (client) { // If a new client connects
+    Serial.println("New Client."); // Log new client connection
+    String currentLine = ""; // Holds data from client
+    while (client.connected()) { // While client is connected
+      if (client.available()) { // If data is available from client
+        char c = client.read(); // Read data
+        Serial.write(c); // Echo data to serial monitor
+        if (c == '\n') { // End of line
+          if (currentLine.length() == 0) { // If line is empty, client sent all data
+            // Send HTTP response
+            client.println("HTTP/1.1 200 OK");
+            client.println("Content-type:text/html");
+            client.println();
+
+            // Webpage content
+            client.println("<!DOCTYPE html><html>");
+            client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head>");
+            client.println("<body><h2>Heater Control</h2>");
+            client.println("<p><a href=\"/ON\">Turn On</a></p>");
+            client.println("<p><a href=\"/OFF\">Turn Off</a></p>");
+            client.println("<p><a href=\"/HeatingCycle\">Start Heating Cycle</a></p>");
+            client.println("</body></html>");
+
+            break; // Disconnect after sending response
+          } else {
+            currentLine = ""; // Clear current line
+          }
+        } else if (c != '\r') {
+          currentLine += c; // Add to current line
+        }
+
+        // Check for commands in the request
+        if (currentLine.endsWith("GET /ON")) {
+          digitalWrite(LED_BUILTIN, HIGH); // Turn on LED
+        }
+        if (currentLine.endsWith("GET /OFF")) {
+          digitalWrite(LED_BUILTIN, LOW); // Turn off LED
+        }
+        if (currentLine.endsWith("GET /HeatingCycle")) {
+          startHeatingCycle(); // Initiate heating cycle
+        }
+      }
+    }
+    client.stop(); // Disconnect client
+    Serial.println("Client Disconnected.");
+  }
+  
+  handleHeatingCycle(); // Handle non-blocking heating cycle
+}
+
+void startHeatingCycle() {
+  if (!heatingCycleActive) {
+    heatingCycleActive = true;
+    heatingCycleStartTime = millis(); // Record start time
+    digitalWrite(LED_BUILTIN, HIGH); // Turn on LED
+    digitalWrite(2, HIGH);
+  }
+}
+
+void handleHeatingCycle() {
+  if (heatingCycleActive) {
+    unsigned long currentTime = millis();
+
+    // First phase: LED on for 4 seconds
+    if (currentTime - heatingCycleStartTime < 4000) {
+      digitalWrite(LED_BUILTIN, HIGH);
+      digitalWrite(2, HIGH);
+    }
+    // Second phase: LED off for 30 seconds
+    else if (currentTime - heatingCycleStartTime < 34000) {
+      digitalWrite(LED_BUILTIN, LOW);
+      digitalWrite(2, LOW);
+    } else {
+      // End of cycle
+      heatingCycleActive = false;
+    }
+  }
+}
