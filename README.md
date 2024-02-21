@@ -14,5 +14,5 @@ https://blog.csdn.net/weixin_38288325/article/details/132366604
 https://blog.csdn.net/weixin_46251230/article/details/125470826   
 6. Nano33IoT   
 https://store-usa.arduino.cc/products/arduino-nano-33-iot  
-
-
+7. LightBlue（Bluetooth App）  
+https://punchthrough.com/lightblue-features/  
