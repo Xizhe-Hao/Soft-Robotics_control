@@ -1,5 +1,7 @@
 # Soft-Robotics_control
 ## Use Bluetooth/WiFi to control the movement of the robot
+### Manual link:  
+https://arrow-war-c6e.notion.site/2024GEARS_Soft_Robotics-Manual-c23d6fcd0fbb4f099ac6734a8f8af373  
 ### References:
 1.TinyCircuit_Bluetooth  
 https://github.com/TinyCircuits/TinyCircuits-TinyShield-BLE-ASD2116/tree/master/examples  
