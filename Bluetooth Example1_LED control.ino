@@ -23,6 +23,7 @@ void setup() {
     while (1);
   }
 
+
   // set advertised local name and service UUID:
   BLE.setLocalName("Nano 33 IoT");
   BLE.setAdvertisedService(ledService);
